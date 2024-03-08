@@ -8,6 +8,7 @@ import './circle-marker-dynamic';
 import './timedout-marker';
 
 import dataManager from './dataManager';
+import {request} from "./utils";
 
 var issuesmap, issueslayer;
 
@@ -24,7 +25,7 @@ export async function init() {
 	}
 	var issues = await dataManager.getData();
 	$('#issues-map').empty();
-	issuesmap = L.map('issues-map').setView([43.605413, 3.879568], 11);
+	issuesmap = L.map('issues-map').setView([48.041475 , 7.122932], 13);
 	window.issuesmap = issuesmap;
 
 	var baseLayers = {
@@ -56,7 +57,7 @@ export async function init() {
 	};
 
 	L.control.layers(baseLayers, {}).addTo(issuesmap);
-
+	L.control.locate({locateOptions:  {flyTo: true, keepCurrentZoomLevel: true, enableHighAccuracy: true}}).addTo(issuesmap);
 }
 var firstFocus = true;
 export async function focus() {
@@ -95,6 +96,44 @@ export async function displayIssues(nozoom) {
 		fitMapBoundsFromIssues()
 	}
 
+}
+
+export async function getAdress(lat,lng){
+	return request(`https://wxs.ign.fr/essentiels/geoportail/geocodage/rest/0.1/reverse?lon=${lng}&lat=${lat}&index=address&limit=10&returntruegeometry=false`)
+		.then(res => {
+			if(!res.features || res.features.length === 0){
+				return "Adresse inconnue"
+			}
+			const properties = res.features[0].properties
+			const rue = properties.name
+			const postcode = properties.citycode
+			const city = properties.city
+			return rue + ' ' + postcode + ' ' + city
+		})
+}
+
+
+export async function createIssueOnClick(){
+
+	issuesmap.on('click', async function (e) {
+		console.log(e.latlng)
+		await getAdress(e.latlng.lat, e.latlng.lng).then((adresse) => {
+			L.popup()
+				.setLatLng(e.latlng)
+				.setContent(`<a title="Ajouter une obversation" class="btn-floating btn-small yellow darken-3 black-text" 
+				onclick="startForm()">
+				<i class="material-icons">add</i>
+			  </a> ${adresse} `)
+				.openOn(issuesmap)
+			const url = new URL(window.location.href);
+			url.searchParams.set('lat', e.latlng.lat);
+			url.searchParams.set('lng', e.latlng.lng);
+			url.searchParams.set('adresse', adresse);
+			window.history.pushState({}, '', url);
+
+		})
+
+	});
 }
 
 

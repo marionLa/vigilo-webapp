@@ -104,6 +104,7 @@ export default class VigiloApp {
 
         await list.displayIssues(30);
         await map.displayIssues();
+        await map.createIssueOnClick();
 
         // Link bug
         $("a[href='https://github.com/jesuisundesdeux/vigilo-webapp/issues/new?template=bug.md']").click(async function(){

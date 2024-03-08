@@ -1,0 +1,8 @@
+{
+  "CCVM": {
+    "api_path": "https://vigilo.vallees-connectees.alsace/server",
+    "country": "France",
+    "prod": true,
+    "scope": "68_ccvm"
+  }
+}

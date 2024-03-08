@@ -1,22 +1,21 @@
 import {request} from './utils';
 import localDataManager from './localDataManager';
 
-const SCOPES_URL="https://raw.githubusercontent.com/jesuisundesdeux/vigilo-conf/main/main/citylist.json";
 const CATEGORIES_URL="https://raw.githubusercontent.com/jesuisundesdeux/vigilo-conf/main/main/categorielist.json";
 const RESOLVABLE_CATEGORIES=[2,3,4,5,6,7,8,11,100]
 
 export async function getInstances(all){
-    if (localDataManager.isDev()) {
+    if (localDataManager.isDev()){
       var scopes = []
       scopes.push({ 
-        api_path: "http://127.0.0.1", 
+        api_path: "https://vigilo.vallees-connectees.alsace/server",
         country: "France", 
         prod: "true", 
-        scope: "XX_dev", 
+        scope: "68_ccvm",
         name: "Dev"});
     }
     else {
-      var scopes = await request(SCOPES_URL);
+      var scopes = require('../public/cities.json');
       scopes = Object.entries(scopes).map((item)=>{
           item[1].name = item[0];
           return item[1]

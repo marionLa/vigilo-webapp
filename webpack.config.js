@@ -11,7 +11,8 @@ module.exports = {
 	entry: './src/js/main.js',
 	output: {
 		filename: 'js/main.js',
-		path: path.resolve(__dirname, 'dist')
+		path: path.resolve(__dirname, 'dist'),
+
 	},
 	module: {
 		rules: [{
@@ -78,7 +79,7 @@ module.exports = {
 	devServer: {
 		contentBase: path.join(__dirname, 'dist'),
 		compress: false,
-		host: "0.0.0.0",
-		port: 80
+		host: "localhost",
+		port: 9000
 	}
 };

@@ -26,6 +26,21 @@ window.startForm = async function (token) {
   $(".onissueonly").show();
   $(".onresolutiononly").hide();
 
+  const urlParams = new URLSearchParams(window.location.search);
+/*if(urlParams.get('lat') && urlParams.get('lng')) {
+  const lat = urlParams.get('lat');
+  const lng = urlParams.get('lng');
+  formmap.setView([lat,lng], 18);
+
+}
+  if (urlParams.get('adresse')) {
+    const adresse = urlParams.get('adresse');
+    $("#issue-address").val(addressFormat(adresse))
+    M.updateTextFields();
+  }*/
+  const latlng = [urlParams.get('lat'), urlParams.get('lng')];
+  await setFormMapPoint(latlng, urlParams.get('adresse'))
+
   if (token !== undefined) {
     $("#issue-cat option[value=resolution]").prop("disabled", "true");
     var issues = await dataManager.getData();
@@ -228,8 +243,7 @@ async function initFormMap() {
     fullscreenControlOptions: {
       position: 'topleft'
     }
-  }).setView([43.605413, 3.879568], 11);
-
+  }).setView([48.041475 , 7.122932], 11);
   formmap.fitBounds([
     [
       parseFloat(scope.coordinate_lat_min),
@@ -316,17 +330,20 @@ async function setFormMapPoint(latlng, address) {
   if (formmap === undefined) {
     return
   }
-  var scope = await vigilo.getScope();
-  var bounds_scope = L.latLngBounds([scope.coordinate_lat_min, scope.coordinate_lon_min], [scope.coordinate_lat_max, scope.coordinate_lon_max])
 
-  if (!bounds_scope.contains(latlng)) {
-    // Outside !
-    alert("La localisation doit se trouver dans la zone géographique choisie.");
-    return
-  }
+
+  await isInScope(latlng).then(isIn => {
+    if (!isInScope(latlng)) {
+      // Outside !
+      alert("La localisation doit se trouver dans la zone géographique choisie.");
+      return
+    }
+
+  })
 
   formmap.setView(latlng, 18);
   mapmarker.setLatLng(latlng).addTo(formmap)
+  console.log('adress', address)
   if (address !== undefined) {
     $("#issue-address").val(addressFormat(address))
     M.updateTextFields();
@@ -339,6 +356,13 @@ async function setFormMapPoint(latlng, address) {
       }
     })
   }
+}
+
+async function isInScope(latlng){
+    var scope = await vigilo.getScope();
+    var bounds_scope = L.latLngBounds([scope.coordinate_lat_min, scope.coordinate_lon_min], [scope.coordinate_lat_max, scope.coordinate_lon_max])
+    return bounds_scope.contains(L.latLng(latlng))
+
 }
 
 function deg2rad(val){return val * Math.PI / 180}
@@ -367,7 +391,6 @@ async function findNearestIssue(latlng){
   var issue = await vigilo.getIssues();
   var related_issues = issue.filter(isResolvable).filter((i) => distance(latlng.lat, latlng.lng, i.lat_float, i.lon_float) < 500);
   related_issues.sort((a,b)=>distance(latlng.lat, latlng.lng, a.lat_float, a.lon_float) > distance(latlng.lat, latlng.lng, b.lat_float, b.lon_float))
-  console.log(related_issues);
   $("#related-issues").empty();
   related_issues.forEach((i)=>$("#related-issues").append(relatedIssueCard(i)))
   M.Materialbox.init($("#related-issues .materialboxed"));

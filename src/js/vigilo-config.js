@@ -1,7 +1,7 @@
 import {request} from './utils';
 import localDataManager from './localDataManager';
 
-const CATEGORIES_URL="https://raw.githubusercontent.com/jesuisundesdeux/vigilo-conf/main/main/categorielist.json";
+const CATEGORIES_URL=require('../public/categorielist.json');
 const RESOLVABLE_CATEGORIES=[2,3,4,5,6,7,8,11,100]
 
 export async function getInstances(all){
@@ -10,7 +10,7 @@ export async function getInstances(all){
       scopes.push({ 
         api_path: "https://vigilo.vallees-connectees.alsace/server",
         country: "France", 
-        prod: "true", 
+        prod: true,
         scope: "68_ccvm",
         name: "Dev"});
     }
@@ -32,31 +32,34 @@ export async function getInstances(all){
 
 export function getCategories() {
 
-    return request(CATEGORIES_URL)
-        .then((cat) => {
-            let toreturn = {}
-            for (var i in cat) {
-                if (cat[i].catdisable !== true) {
-                   cat[i].catdisable = false;
+    return new Promise((resolve, reject) => {
+        try {
+            let toreturn = {};
+            for (const category of CATEGORIES_URL) {
+                if (category.catdisable !== true) {
+                    category.catdisable = false;
                 }
-                cat[i].i18n = [];
-                for (var j in cat[i]) {
-                    if (j.startsWith("catname_")){
-                        cat[i].i18n[j.replace("catname_", "")] = cat[i][j];
+                category.i18n = {};
+                for (const key of Object.keys(category)) {
+                    if (key.startsWith("catname_")){
+                        category.i18n[key.replace("catname_", "")] = category[key];
                     }
                 }
-                toreturn[cat[i].catid] = {
-                    id: cat[i].catid,
-                    name: cat[i].catname,
-                    i18n: cat [i].i18n,
-                    color: cat[i].catcolor,
-                    disable: cat[i].catdisable,
-                    resolvable: RESOLVABLE_CATEGORIES.includes(cat[i].catid),
+                toreturn[category.catid] = {
+                    id: category.catid,
+                    name: category.catname,
+                    i18n: category.i18n,
+                    color: category.catcolor,
+                    disable: category.catdisable,
+                    resolvable: RESOLVABLE_CATEGORIES.includes(category.catid),
                 };
             }
-            return toreturn;
-        });
-
+            resolve(toreturn);
+        } catch (error) {
+            console.error('Error parsing categories data:', error);
+            reject(error);
+        }
+    });
 };
 
 var pkg= require('../../package.json');

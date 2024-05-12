@@ -150,15 +150,15 @@ window.centerOnIssue = centerOnIssue
 
 const STYLES = {
 	"0-11": {
-		radius: 1,
+		radius: 8,
 		weight: 1,
 	},
 	"12-13": {
-		radius: 2,
+		radius: 8,
 		weight: 1,
 	},
 	"14-15": {
-		radius: 4,
+		radius: 8,
 		weight: 1,
 	},
 	"16-20": {

@@ -21,25 +21,16 @@ window.startForm = async function (token) {
   var modal = M.Modal.getInstance($("#modal-form")[0]);
   modal.open();
   await initFormMap();
-
   $("#issue-cat option[value=resolution]").removeProp("disabled");
   $(".onissueonly").show();
   $(".onresolutiononly").hide();
 
   const urlParams = new URLSearchParams(window.location.search);
-/*if(urlParams.get('lat') && urlParams.get('lng')) {
-  const lat = urlParams.get('lat');
-  const lng = urlParams.get('lng');
-  formmap.setView([lat,lng], 18);
 
-}
-  if (urlParams.get('adresse')) {
-    const adresse = urlParams.get('adresse');
-    $("#issue-address").val(addressFormat(adresse))
-    M.updateTextFields();
-  }*/
-  const latlng = [urlParams.get('lat'), urlParams.get('lng')];
-  await setFormMapPoint(latlng, urlParams.get('adresse'))
+  let latlng = [urlParams.get('lat'), urlParams.get('lng')];
+    if(latlng[0] || latlng[1]){
+        await setFormMapPoint(latlng, urlParams.get('adresse'))
+    }
 
   if (token !== undefined) {
     $("#issue-cat option[value=resolution]").prop("disabled", "true");
@@ -333,17 +324,15 @@ async function setFormMapPoint(latlng, address) {
 
 
   await isInScope(latlng).then(isIn => {
-    if (!isInScope(latlng)) {
+    if (latlng && !isInScope(latlng)) {
       // Outside !
       alert("La localisation doit se trouver dans la zone géographique choisie.");
       return
     }
 
   })
-
   formmap.setView(latlng, 18);
   mapmarker.setLatLng(latlng).addTo(formmap)
-  console.log('adress', address)
   if (address !== undefined) {
     $("#issue-address").val(addressFormat(address))
     M.updateTextFields();
@@ -360,7 +349,9 @@ async function setFormMapPoint(latlng, address) {
 
 async function isInScope(latlng){
     var scope = await vigilo.getScope();
+
     var bounds_scope = L.latLngBounds([scope.coordinate_lat_min, scope.coordinate_lon_min], [scope.coordinate_lat_max, scope.coordinate_lon_max])
+
     return bounds_scope.contains(L.latLng(latlng))
 
 }
@@ -379,7 +370,7 @@ function distance(lat1, lng1, lat2, lng2)
     var dla          = (rla2 - rla1) / 2;
     var a            = (Math.sin(dla) * Math.sin(dla)) + Math.cos(rla1) * Math.cos(rla2) * (Math.sin(dlo) * Math.sin(dlo));
     var d            = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    
+
     return earth_radius * d;
 }
 
@@ -518,7 +509,7 @@ $("#modal-form form").submit((e) => {
   } else {
     firstStep = vigilo.createIssue(data, key);
   }
-  
+
   firstStep
     .then((createResponse) => {
       if (createResponse.status != 0 && createResponse.token == undefined) {

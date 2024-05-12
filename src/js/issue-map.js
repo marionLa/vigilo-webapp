@@ -116,7 +116,6 @@ export async function getAdress(lat,lng){
 export async function createIssueOnClick(){
 
 	issuesmap.on('click', async function (e) {
-		console.log(e.latlng)
 		await getAdress(e.latlng.lat, e.latlng.lng).then((adresse) => {
 			L.popup()
 				.setLatLng(e.latlng)

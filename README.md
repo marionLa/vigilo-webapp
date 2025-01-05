@@ -1,5 +1,13 @@
 # vigilo-webapp
 
+Ce repo est un fork de l'application web [Vigilo](https://github.com/jesuisundesdeux/vigilo-webapp) 
+à titre d'expérimentation.
+👉 Création d'une instance locale pour le [Collectif Cycliste de la Vallée de Munster](https://munstertransition.org/le-collectif-cycliste-de-la-valle/)
+Un grand ❤️ aux développeurs [jesuisundesdeux](https://github.com/jesuisundesdeux)
+
+
+## 👇 Readme original  
+
 [![Build Status](https://travis-ci.org/jesuisundesdeux/vigilo-webapp.svg?branch=master)](https://travis-ci.org/jesuisundesdeux/vigilo-webapp)
 
 
